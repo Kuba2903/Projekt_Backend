@@ -1,4 +1,8 @@
-﻿using Infrastructure;
+﻿using AutoMapper;
+using Core.DTO_s;
+using Core.Models;
+using Core.Services;
+using Infrastructure;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,21 +12,25 @@ namespace API.Controllers
     [ApiController]
     public class UniversityController : ControllerBase
     {
-        private readonly AppDbContext _context;
-
-        public UniversityController(AppDbContext context)
+        private readonly IUniversity _service;
+        private readonly IMapper mapper;
+        public UniversityController(IUniversity service, IMapper mapper)
         {
-            _context = context;
+            _service = service;
+            this.mapper = mapper;
         }
 
         [HttpGet]
         [Route("getUniversities")]
 
-        public IActionResult GetUniversities()
+        public IActionResult GetUniversities(int pageNumber = 1, int pageSize = 5)
         {
-            var uni = _context.Universities.Select(x => new { x.Id, x.CountryId });
+            if (pageNumber < 1 || pageSize < 1)
+                return BadRequest("pageSize or pageNumber cannot be less than 1");
 
-            return Ok(uni);
+            var uni = _service.GetAll<University>(pageSize,pageNumber);
+
+            return Ok(uni.Select(mapper.Map<UniversityDTO>));
         }
     }
 }
