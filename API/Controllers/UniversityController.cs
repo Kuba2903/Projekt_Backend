@@ -6,6 +6,7 @@ using Infrastructure;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace API.Controllers
 {
@@ -54,10 +55,66 @@ namespace API.Controllers
                                 score = university_ranking.Score,
                                 criteria = criterion.CriteriaName
                             };
-                return Ok(query);
+
+                var paginatedQuery = query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+                var result = paginatedQuery
+                    .GroupBy(x => new { x.uniId, x.uniName })
+                    .Select(g => new
+                    {
+                        universityId = g.Key.uniId,
+                        universityName = g.Key.uniName,
+                        scores = g.Select(x => new
+                        {
+                            year = x.year,
+                            score = x.score,
+                            criteriaName = x.criteria
+                        }).ToList()
+                    })
+                    .ToList();
+
+                return Ok(result);
+            }
+            else
+            {
+                return BadRequest();
             }
 
-            return Ok(uni.Select(mapper.Map<UniversityDTO>));
+            
         }
+
+
+        [HttpPost]
+        [Route("/api/universities/{id}/scores")]
+        public IActionResult AddResult([FromRoute] int id, UniversityRankingYearDTO dto)
+        {
+
+            var university = _context.Universities.FirstOrDefault(x => x.Id == id);
+
+            if(university != null)
+            {
+                UniversityRankingYear entity = new UniversityRankingYear()
+                {
+                    UniversityId = university.Id,
+                    RankingCriteriaId = dto.RankingCriteriaId,
+                    Score = dto.Score,
+                    Year = dto.Year,
+                };
+
+                _context.UniversityRankingYears.Add(entity);
+                _context.SaveChanges();
+
+                return Created();
+            }
+            else
+            {
+                return BadRequest();
+            }
+        }
+
     }
-}
+ }
+

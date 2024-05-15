@@ -8,7 +8,6 @@ namespace Core.DTO_s
 {
     public class UniversityRankingYearDTO
     {
-        public int? UniversityId { get; set; }
 
         public int? RankingCriteriaId { get; set; }
 

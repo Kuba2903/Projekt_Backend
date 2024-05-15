@@ -13,5 +13,6 @@ namespace Core.DTO_s
         public int? CountryId { get; set; }
 
         public string? UniversityName { get; set; }
+        public List<ScoreDto> Scores { get; set; }
     }
 }

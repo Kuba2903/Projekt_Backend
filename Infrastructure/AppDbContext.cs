@@ -105,9 +105,12 @@ namespace Infrastructure
 
             modelBuilder.Entity<UniversityRankingYear>(entity =>
             {
-                entity
+                /*entity
                     .HasNoKey()
-                    .ToTable("university_ranking_year");
+                    .ToTable("university_ranking_year");*/
+
+                entity.HasKey(ur => new { ur.UniversityId, ur.RankingCriteriaId, ur.Year });
+                entity.ToTable("university_ranking_year");
 
                 entity.HasIndex(e => e.RankingCriteriaId, "fk_ury_rc");
 
