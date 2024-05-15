@@ -128,6 +128,8 @@ namespace Infrastructure
                 entity.HasOne(d => d.University).WithMany()
                     .HasForeignKey(d => d.UniversityId)
                     .HasConstraintName("fk_ury_uni");
+
+               
             });
 
             modelBuilder.Entity<UniversityYear>(entity =>

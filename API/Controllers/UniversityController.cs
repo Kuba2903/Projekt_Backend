@@ -92,6 +92,24 @@ namespace API.Controllers
         public IActionResult AddResult([FromRoute] int id, UniversityRankingYearDTO dto)
         {
 
+            if (dto.Score < 0 || dto.Score > 100)
+                return BadRequest("Wynik powinien być w przedziale 0-100");
+
+            var currentYear = DateTime.Now.Year;
+            if (dto.Year < 1900 || dto.Year > currentYear)
+            {
+                return BadRequest($"Rok musi być w przedziale 1900 - {currentYear}.");
+            }
+
+            var existingScore = _context.UniversityRankingYears
+            .FirstOrDefault(x => x.UniversityId == id && x.Year == dto.Year && x.RankingCriteriaId == dto.RankingCriteriaId);
+
+            if (existingScore != null)
+            {
+                return BadRequest("Punktacja dla danego roku i kryterium już istnieje.");
+            }
+
+
             var university = _context.Universities.FirstOrDefault(x => x.Id == id);
 
             if(university != null)
@@ -111,7 +129,7 @@ namespace API.Controllers
             }
             else
             {
-                return BadRequest();
+                return BadRequest("Błąd żądania");
             }
         }
 
